@@ -8,7 +8,7 @@ body {
 
 header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 }
 
 h1 {
@@ -187,6 +187,16 @@ h1 {
     margin-bottom: 20px;
     color: #ccc;
     font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.option-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 .options-bar label {
@@ -199,6 +209,24 @@ h1 {
 .options-bar input[type="checkbox"] {
     accent-color: #ffd700;
     cursor: pointer;
+}
+
+.action-btn {
+    background-color: #333;
+    color: #ffd700;
+    border: 1px solid #ffd700;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: 0;
+    transition: all 0.2s;
+    width: fit-content;
+}
+
+.action-btn:hover {
+    background-color: #ffd700;
+    color: #000;
 }
 
 /* 适配移动端 */

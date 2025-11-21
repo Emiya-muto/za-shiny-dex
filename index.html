@@ -13,10 +13,15 @@
     </header>
 
     <div class="options-bar">
-        <label>
-            <input type="checkbox" id="toggle-grayscale" checked>
-            当数量为1时显示黑白头像
-        </label>
+        <div class="option-row">
+            <label>
+                <input type="checkbox" id="toggle-grayscale" checked>
+                当数量为1时显示黑白头像
+            </label>
+        </div>
+        <div class="option-row">
+            <button id="save-image-btn" class="action-btn">保存为图片</button>
+        </div>
     </div>
 
     <div id="app" class="container">
@@ -26,6 +31,8 @@
 
     <!-- 引入数据文件 -->
     <script src="data.js"></script>
+    <!-- 引入 dom-to-image-more -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
     <!-- 引入逻辑文件 -->
     <script src="script.js"></script>
 </body>

@@ -28,6 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateAllVisuals();
             });
         }
+
+        // 监听保存图片按钮
+        const saveBtn = document.getElementById('save-image-btn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', handleSaveImage);
+        }
     }
 
     // 从 localStorage 加载状态
@@ -326,5 +332,129 @@ document.addEventListener('DOMContentLoaded', () => {
             const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
             percentageEl.textContent = `${percentage}%`;
         }
+    }
+
+    // 保存图片功能
+    function handleSaveImage() {
+        const btn = document.getElementById('save-image-btn');
+        const originalText = btn ? btn.textContent : '保存为图片';
+        
+        if (btn) {
+            btn.textContent = '生成中...';
+            btn.disabled = true;
+        }
+
+        // 记录当前滚动位置
+        const scrollY = window.scrollY;
+        window.scrollTo(0, 0);
+
+        // 临时处理懒加载图片，防止截图空白
+        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+        lazyImages.forEach(img => {
+            img.dataset.originalLoading = img.loading;
+            img.loading = 'eager';
+        });
+
+        // 临时处理 stats-bar，去掉 backdrop-filter，因为 dom-to-image 不支持
+        // 并且确保它是绝对定位在最底部
+        const statsBar = document.querySelector('.stats-bar');
+        let originalStatsBarStyle = '';
+        if (statsBar) {
+            originalStatsBarStyle = statsBar.getAttribute('style') || '';
+            
+            // 计算应该放置的位置：文档总高度 - 栏高
+            // 注意：要在 window.scrollTo(0,0) 之后计算，否则可能受滚动影响（虽然理论上 scrollHeight 不变）
+            const totalHeight = document.body.scrollHeight;
+            
+            statsBar.style.position = 'absolute';
+            statsBar.style.top = (totalHeight - statsBar.offsetHeight) + 'px';
+            statsBar.style.bottom = 'auto';
+            statsBar.style.left = '0';
+            statsBar.style.width = '100%';
+            statsBar.style.backdropFilter = 'none'; // 禁用特效
+            statsBar.style.zIndex = '9999'; // 确保在最上层
+        }
+
+        // 临时隐藏 options-bar（包含保存按钮）
+        const optionsBar = document.querySelector('.options-bar');
+        let originalOptionsBarDisplay = '';
+        if (optionsBar) {
+            originalOptionsBarDisplay = optionsBar.style.display;
+            optionsBar.style.display = 'none';
+        }
+
+        // 获取当前可视宽度，确保截图时的布局与用户看到的一致（特别是 Grid 布局）
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        
+        // 不再需要 options 配置对象，dom-to-image 参数不同
+
+
+        // 恢复状态的辅助函数
+        const restoreState = () => {
+            if (statsBar) {
+                // 恢复 style
+                if (originalStatsBarStyle) {
+                    statsBar.setAttribute('style', originalStatsBarStyle);
+                } else {
+                    statsBar.removeAttribute('style');
+                }
+            }
+            
+            if (optionsBar) {
+                optionsBar.style.display = originalOptionsBarDisplay;
+            }
+            
+            // 恢复懒加载
+            lazyImages.forEach(img => {
+                if (img.dataset.originalLoading) {
+                    img.loading = img.dataset.originalLoading;
+                    delete img.dataset.originalLoading;
+                }
+            });
+
+            // 恢复滚动
+            window.scrollTo(0, scrollY);
+
+            if (btn) {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        // 确保 domtoimage 已加载
+        if (typeof domtoimage === 'undefined') {
+            alert('组件加载中，请稍后再试');
+            restoreState();
+            return;
+        }
+        
+        // 稍微延迟一点，确保样式应用和图片加载
+        setTimeout(() => {
+            // 使用 dom-to-image 替换 html2canvas
+            domtoimage.toPng(document.body, {
+                bgcolor: '#1a1a1a',
+                width: viewportWidth,
+                height: document.body.scrollHeight
+            })
+            .then(function (dataUrl) {
+                restoreState();
+                try {
+                    const link = document.createElement('a');
+                    link.download = 'pokemon_shiny_dex_' + new Date().toISOString().slice(0,10) + '.png';
+                    link.href = dataUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch (e) {
+                    console.error('Export error:', e);
+                    alert('图片导出失败: ' + e.message);
+                }
+            })
+            .catch(function (error) {
+                console.error('Dom-to-image error:', error);
+                alert('生成图片出错: ' + error.message);
+                restoreState();
+            });
+        }, 100);
     }
 });
