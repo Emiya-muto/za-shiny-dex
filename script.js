@@ -1,19 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app');
+    // 允许这些元素不存在
     const totalProgressEl = document.getElementById('total-progress');
     const percentageEl = document.getElementById('percentage');
 
     // 存储闪光状态：Object { [id: string]: number } 存储已获得的宝可梦ID和数量
     // 示例: { "001": 1, "005": 3 }
     let shinyState = {};
+    let grayscaleOnOne = true; // 默认开启
 
     // 初始化
     init();
 
     function init() {
         loadState();
+        loadConfig();
         render();
         updateStats();
+
+        // 监听配置变化
+        const toggle = document.getElementById('toggle-grayscale');
+        if (toggle) {
+            toggle.checked = grayscaleOnOne;
+            toggle.addEventListener('change', (e) => {
+                grayscaleOnOne = e.target.checked;
+                saveConfig();
+                updateAllVisuals();
+            });
+        }
     }
 
     // 从 localStorage 加载状态
@@ -41,6 +55,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // 保存状态到 localStorage
     function saveState() {
         localStorage.setItem('za_shiny_dex_state', JSON.stringify(shinyState));
+    }
+
+    function loadConfig() {
+        const saved = localStorage.getItem('za_shiny_dex_config_grayscale');
+        if (saved !== null) {
+            grayscaleOnOne = saved === 'true';
+        }
+    }
+
+    function saveConfig() {
+        localStorage.setItem('za_shiny_dex_config_grayscale', grayscaleOnOne);
+    }
+
+    function updateAllVisuals() {
+        const allItems = document.querySelectorAll('.pokemon-item');
+        allItems.forEach(item => {
+            const id = item.dataset.id;
+            const count = shinyState[id] || 0;
+            if (count === 1 && grayscaleOnOne) {
+                item.classList.add('grayscale');
+            } else {
+                item.classList.remove('grayscale');
+            }
+        });
     }
 
     // 渲染界面
@@ -76,6 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const item = document.createElement('div');
                 item.className = `pokemon-item ${isShiny ? 'shiny' : ''}`;
+                if (isShiny && count === 1 && grayscaleOnOne) {
+                    item.classList.add('grayscale');
+                }
                 item.dataset.id = pokemonId;
                 item.title = `ID: ${pokemonId}`;
 
@@ -219,8 +260,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (count > 0) {
                 item.classList.add('shiny');
                 img.src = getImagePath(id, true);
+                if (count === 1 && grayscaleOnOne) {
+                    item.classList.add('grayscale');
+                } else {
+                    item.classList.remove('grayscale');
+                }
             } else {
-                item.classList.remove('shiny');
+                item.classList.remove('shiny', 'grayscale');
                 img.src = getImagePath(id, false);
             }
         });
@@ -257,20 +303,28 @@ document.addEventListener('DOMContentLoaded', () => {
             totalShinyCount += count;
         });
 
-        totalProgressEl.textContent = `${completedTasks} / ${totalTasks}`;
+        if (totalProgressEl) {
+            totalProgressEl.textContent = `${completedTasks} / ${totalTasks}`;
+        }
         
         let countEl = document.getElementById('total-count');
-        if (!countEl) {
-            const container = document.querySelector('.stats-bar');
+        // 只有当 stats-bar 存在时才尝试插入 total-count
+        const container = document.querySelector('.stats-bar');
+        if (!countEl && container && percentageEl) {
             const div = document.createElement('div');
             div.className = 'stat-item';
             div.innerHTML = `闪光总数: <span id="total-count" class="stat-value">0</span>`;
             container.insertBefore(div, percentageEl.parentNode);
             countEl = document.getElementById('total-count');
         }
-        countEl.textContent = totalShinyCount;
+        
+        if (countEl) {
+            countEl.textContent = totalShinyCount;
+        }
 
-        const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-        percentageEl.textContent = `${percentage}%`;
+        if (percentageEl) {
+            const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            percentageEl.textContent = `${percentage}%`;
+        }
     }
 });

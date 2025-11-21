@@ -86,6 +86,15 @@ h1 {
     border: 2px solid #ffd700;
 }
 
+/* 黑白化样式 */
+.pokemon-item.grayscale {
+    filter: grayscale(100%);
+}
+/* 确保选中状态的黑白化样式仍然保留边框，但由于 filter: grayscale(100%) 会把所有颜色变黑白，
+   边框也会变成灰色。这符合“数字也一样黑白”的描述。
+   如果需要边框保持金色，只能对 img 和 span 应用 filter，但对 .pokemon-item 应用最简单且符合“数字也一样黑白”。
+*/
+
 .pokemon-item.shiny .count-badge {
     display: block;
     cursor: text;
@@ -143,6 +152,7 @@ h1 {
 }
 .count-input {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 /* 统计栏 */
@@ -169,6 +179,26 @@ h1 {
     color: #ffd700;
     font-weight: bold;
     margin-left: 5px;
+}
+
+/* 配置选项区域 */
+.options-bar {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.options-bar label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.options-bar input[type="checkbox"] {
+    accent-color: #ffd700;
+    cursor: pointer;
 }
 
 /* 适配移动端 */
