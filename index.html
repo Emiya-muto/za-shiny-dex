@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝可梦ZA 闪光图鉴统计</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>宝可梦ZA 闪光图鉴统计</h1>
+        <p style="margin-top: 10px; color: #888;">点击头像标记/取消标记闪光状态</p>
+    </header>
+
+    <div id="app" class="container">
+        <!-- 区域内容将由 JavaScript 生成 -->
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            总进度: <span id="total-progress" class="stat-value">0 / 0</span>
+        </div>
+        <div class="stat-item">
+            达成率: <span id="percentage" class="stat-value">0%</span>
+        </div>
+    </div>
+
+    <!-- 引入数据文件 -->
+    <script src="data.js"></script>
+    <!-- 引入逻辑文件 -->
+    <script src="script.js"></script>
+</body>
+</html>
+
